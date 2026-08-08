@@ -3,6 +3,7 @@ package com.srujan.backend.service.impl;
 import com.srujan.backend.entity.User;
 import com.srujan.backend.repository.UserRepository;
 import com.srujan.backend.service.UserService;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -12,13 +13,17 @@ import java.util.Optional;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    public UserServiceImpl(UserRepository userRepository) {
+    public UserServiceImpl(UserRepository userRepository,
+                           PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
     public User createUser(User user) {
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
         return userRepository.save(user);
     }
 
@@ -54,7 +59,12 @@ public class UserServiceImpl implements UserService {
 
         updatedUser.setUsername(user.getUsername());
         updatedUser.setEmail(user.getEmail());
-        updatedUser.setPassword(user.getPassword());
+
+        // Encode the new password before saving
+        if (user.getPassword() != null && !user.getPassword().isBlank()) {
+            updatedUser.setPassword(passwordEncoder.encode(user.getPassword()));
+        }
+
         updatedUser.setEnabled(user.isEnabled());
         updatedUser.setRoles(user.getRoles());
 

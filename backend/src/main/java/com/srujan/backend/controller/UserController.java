@@ -1,9 +1,10 @@
 package com.srujan.backend.controller;
 
 import com.srujan.backend.dto.RegisterRequest;
+import com.srujan.backend.dto.UserResponse;
+import com.srujan.backend.entity.Role;
 import com.srujan.backend.entity.User;
 import com.srujan.backend.enums.RoleName;
-import com.srujan.backend.entity.Role;
 import com.srujan.backend.repository.RoleRepository;
 import com.srujan.backend.service.UserService;
 import org.springframework.http.HttpStatus;
@@ -24,7 +25,8 @@ public class UserController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<User> registerUser(@RequestBody RegisterRequest request) {
+    public ResponseEntity<UserResponse> registerUser(
+            @RequestBody RegisterRequest request) {
 
         if (userService.findByUsername(request.getUsername()).isPresent()) {
             return ResponseEntity.status(HttpStatus.CONFLICT).build();
@@ -48,6 +50,10 @@ public class UserController {
 
         User createdUser = userService.createUser(user);
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(createdUser);
+        UserResponse response = new UserResponse(createdUser);
+
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(response);
     }
 }
